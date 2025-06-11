@@ -10,8 +10,8 @@ from piper import PiperVoice  # Korrekter Import
 
 app = FastAPI()
 
-model_path = "/app/model/fr_FR-tom-medium.onnx"
-model_path2 = "/app/model/de_DE-thorsten-high.onnx"
+model_path = "./model/fr_FR-tom-medium.onnx"
+model_path2 = "./model/de_DE-thorsten-high.onnx"
 
 # model = whisper.load_model("small")  # Du kannst auch "small", "medium", etc. verwenden
 
@@ -19,6 +19,7 @@ model_size = "tiny"
 
 # Run on CPU
 model = WhisperModel(model_size, device="cpu", compute_type="int8")
+# model = WhisperModel(model_size, device="cuda", compute_type="float16")
 
 
 @app.post("/transcribe")
@@ -100,4 +101,5 @@ async def synthesize_text(request: Request):
                 media_type="audio/wav"
             )
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=str(e))
