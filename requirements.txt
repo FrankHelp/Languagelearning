@@ -1,6 +1,6 @@
 fastapi
-piper-tts
 pydub
 uvicorn 
 python-multipart
 faster-whisper
+"fastapi[standard]"
