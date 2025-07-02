@@ -35,6 +35,9 @@ async def transcribe_audio(file: UploadFile = File(...)):
         # 
         print("audio runtergeladen!")
         segments, info = model.transcribe(str(temp_audio))
+        supported_languages = ['de', 'fr']
+        if info.language not in supported_languages:
+            segments, info = model.transcribe(str(temp_audio), language="fr") # wenn andere sprache erkannt von fr ausgehen
         result = list(segments)
 
         full_text = " ".join(segment.text for segment in result)
