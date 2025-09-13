@@ -17,10 +17,10 @@ model_path2 = "./model/de_DE-thorsten-high.onnx"
 tts_french = PiperVoice.load(model_path, use_cuda=False) # Cuda macht hier kaum was aus
 tts_german = PiperVoice.load(model_path2, use_cuda=False)
 
-model_size = "small"
+model_size = "base"
 
-# model = WhisperModel(model_size, device="cpu", compute_type="int8") # Ohne Cuda Beschleunigung ist Whisper 3-5 mal langsamer
-model = WhisperModel(model_size, device="cuda", compute_type="float16")
+model = WhisperModel(model_size, device="cpu", compute_type="int8") # Ohne Cuda Beschleunigung ist Whisper 3-5 mal langsamer
+# model = WhisperModel(model_size, device="cuda", compute_type="float16")
 
 @app.post("/transcribe")
 async def transcribe_audio(file: UploadFile = File(...)):

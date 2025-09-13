@@ -3,4 +3,4 @@ pydub
 uvicorn 
 python-multipart
 faster-whisper
-"fastapi[standard]"
+piper-tts
