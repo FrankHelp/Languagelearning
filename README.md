@@ -28,6 +28,19 @@ A Python FastAPI server providing speech-to-text (using OpenAI's Whisper) and te
     ```bash
     pip install -r requirements.txt
     ```
+4. **Download voice models:**
+    As Voice Models are too large for git (200MB) you have to download them manually:
+    **On Linux/Mac:**
+    ```bash
+    curl -L -o model/de_DE-thorsten-high.onnx "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx?download=true"
+    curl -L -o model/fr_FR-tom-medium.onnx "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/fr/fr_FR/tom/medium/fr_FR-tom-medium.onnx?download=true"
+    ```
+    **On Windows:**
+    ```powershell
+    curl.exe -L -o model/de_DE-thorsten-high.onnx "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx?download=true"
+    curl.exe -L -o model/fr_FR-tom-medium.onnx "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/fr/fr_FR/tom/medium/fr_FR-tom-medium.onnx?download=true"
+    
+    ```
 #### CUDA support
 
 Code changes for CUDA support:
