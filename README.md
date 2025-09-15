@@ -28,6 +28,19 @@ A Python FastAPI server providing speech-to-text (using OpenAI's Whisper) and te
     ```bash
     pip install -r requirements.txt
     ```
+#### CUDA support
+
+Code changes for CUDA support:
+```python
+tts_french = PiperVoice.load(model_path, use_cuda=True) # change to true 
+tts_german = PiperVoice.load(model_path2, use_cuda=True) # change to true
+```
+```python
+model = WhisperModel(model_size, device="cuda", compute_type="float16") # instead of device "cpu", compute_type="int8"
+```
+
+Note: The latest versions of ctranslate2 only support CUDA 12 and cuDNN 9. For CUDA 11 and cuDNN 8, the current workaround is downgrading to the 3.24.0 version of ctranslate2, for CUDA 12 and cuDNN 8, downgrade to the 4.4.0 version of ctranslate2, (This can be done with pip install --force-reinstall ctranslate2==4.4.0 or specifying the version in the requirements.txt).
+
 #### Running the Server
 
 To start the server in development mode with auto-reload (for code changes), run:
