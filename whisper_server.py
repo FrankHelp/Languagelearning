@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.responses import Response
+from fastapi import Form 
 import wave
 from faster_whisper import WhisperModel
 import os
@@ -14,13 +15,13 @@ app = FastAPI()
 model_path = "./model/fr_FR-tom-medium.onnx"
 model_path2 = "./model/de_DE-thorsten-high.onnx"
 
-tts_french = PiperVoice.load(model_path, use_cuda=False) # Cuda 
-tts_german = PiperVoice.load(model_path2, use_cuda=False) # Cuda
+tts_french = PiperVoice.load(model_path, use_cuda=True) # Cuda 
+tts_german = PiperVoice.load(model_path2, use_cuda=True) # Cuda
 
-model_size = "base"
+model_size = "small"
 
-model = WhisperModel(model_size, device="cpu", compute_type="int8") # Ohne Cuda Beschleunigung ist Whisper 3-5 mal langsamer
-# model = WhisperModel(model_size, device="cuda", compute_type="float16") # Cuda
+# model = WhisperModel(model_size, device="cpu", compute_type="int8") # Ohne Cuda Beschleunigung ist Whisper 3-5 mal langsamer
+model = WhisperModel(model_size, device="cuda", compute_type="float16") # Cuda
 
 @app.post("/transcribe")
 async def transcribe_audio(file: UploadFile = File(...)):
@@ -52,6 +53,38 @@ async def transcribe_audio(file: UploadFile = File(...)):
         total_time = end_time - start_time
         print(f"Transcribe Fehlerzeit: {total_time:.2f} Sekunden")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/transcribeMono")
+async def transcribe_audio(file: UploadFile = File(...), lang: str = Form(...)): # lang-kürzel wie fr de en es
+    start_time = time.time()  # Startzeit messen
+    
+    try:
+        temp_audio = Path("temp_audio")
+        with open(temp_audio, "wb") as buffer:
+            buffer.write(await file.read())
+        
+        print("audio runtergeladen!")
+        segments, info = model.transcribe(str(temp_audio), language=lang)
+        result = list(segments)
+
+        full_text = " ".join(segment.text for segment in result)
+        print(full_text)
+        
+        os.remove(temp_audio)
+        
+        # Gesamtzeit berechnen und ausgeben
+        end_time = time.time()
+        total_time = end_time - start_time
+        print(f"Transcribe Gesamtzeit: {total_time:.2f} Sekunden")
+        
+        return {"text": full_text}
+    except Exception as e:
+        # Auch bei Fehlern die Zeit messen
+        end_time = time.time()
+        total_time = end_time - start_time
+        print(f"Transcribe Fehlerzeit: {total_time:.2f} Sekunden")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/synthesize")
 async def synthesize_text(request: Request):
