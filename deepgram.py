@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.responses import Response
+from fastapi import Form 
 import wave
 import os
 import io
@@ -26,7 +27,7 @@ tts_french = PiperVoice.load(model_path, use_cuda=False) # Cuda macht hier kaum 
 tts_german = PiperVoice.load(model_path2, use_cuda=False)
 
 # Deepgram API Key - sollte als Umgebungsvariable gesetzt werden
-DEEPGRAM_API_KEY = 'bd87f5e678723a988b7dae69062aa0ceadc796c4'
+DEEPGRAM_API_KEY = ''
 
 DEEPGRAM_API_URL = "https://api.deepgram.com/v1/listen"
 
@@ -42,15 +43,15 @@ async def transcribe_with_deepgram(audio_file_path: str, language: str = "fr") -
         "Content-Type": "audio/wav"
     }
     
-    # Bestimme die Sprache für Deepgram
-    if spanish:
-        deepgram_language = "es"
-    else:
-        deepgram_language = "fr" if language == "fr" else "de"
+    # # Bestimme die Sprache für Deepgram
+    # if spanish:
+    #     deepgram_language = "es"
+    # else:
+    #     deepgram_language = "fr" if language == "fr" else "de"
     
     params = {
-        "model": "nova-3",
-        "language": 'multi',
+        "model": "nova-4",
+        "language": f'{language}',
         "punctuate": "true",
         "numerals": "true"
     }
@@ -93,8 +94,9 @@ async def transcribe_audio(file: UploadFile = File(...)):
         print("Audio heruntergeladen! Starte Transkription mit Deepgram...")
         
         # Transkription mit Deepgram durchführen
-        language = "es" if spanish else "fr"
-        full_text = await transcribe_with_deepgram(str(temp_audio), language)
+        # language = "es" if spanish else "fr"
+        # full_text = await transcribe_with_deepgram(str(temp_audio), language)
+        full_text = await transcribe_with_deepgram(str(temp_audio), 'multi')
         
         print(f"Transkription: {full_text}")
         
@@ -104,6 +106,26 @@ async def transcribe_audio(file: UploadFile = File(...)):
         return {"text": full_text}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/transcribeMono")
+async def transcribe_audio(file: UploadFile = File(...), lang: str = Form(...)): # lang-kürzel wie fr de en es
+    try:
+        # Temporäre Audiodatei speichern
+        temp_audio = Path("temp_audio.wav")
+        with open(temp_audio, "wb") as buffer:
+            buffer.write(await file.read())
+        print("Audio heruntergeladen! Starte Transkription mit Deepgram...")
+        full_text = await transcribe_with_deepgram(str(temp_audio), lang)
+        
+        print(f"Transkription: {full_text}")
+        
+        # Temporäre Datei löschen
+        os.remove(temp_audio)
+        
+        return {"text": full_text}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/synthesize")
 async def synthesize_text(request: Request):
